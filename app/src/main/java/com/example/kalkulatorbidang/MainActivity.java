@@ -1,76 +1,136 @@
 package com.example.kalkulatorbidang;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText txtn1, txtn2;
-    Button btnpersegi, btnlingkaran, btnsegitiga;
-    TextView txthasilkeliling, txthasilluas;
+    private FirebaseFirestore db;
+    private static final String TAG = "MainActivity";
+
+    RecyclerviewAdapter adapter;
+
+    EditText Input1, Input2;
+    Button BtnHtg;
+    RadioGroup Group;
+    android.widget.RadioButton RadioButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txtn1 = (EditText) findViewById(R.id.txtn1);
-        txtn2 = (EditText) findViewById(R.id.txtn2);
-        btnpersegi = findViewById(R.id.btnpersegi);
-        btnlingkaran = findViewById(R.id.btnlingkaran);
-        btnsegitiga = findViewById(R.id.btnsegitiga);
-        txthasilkeliling = findViewById(R.id.txthasilkeliling);
-        txthasilluas = findViewById(R.id.txthasilluas);
+        final ArrayList<String> HasilHitungan = new ArrayList<>();
+        final RecyclerView recyclerView = findViewById(R.id.MyRecyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        db = FirebaseFirestore.getInstance();
+
+        Input1 = findViewById(R.id.Input1);
+        Input2 = findViewById(R.id.Input2);
+        BtnHtg = findViewById(R.id.BtnHtg);
+        Group = findViewById(R.id.radioGroup);
+
+        BtnHtg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Double Result;
+                String Operand;
+                int RadioId = Group.getCheckedRadioButtonId();
+                RadioButton = findViewById(RadioId);
+                Toast.makeText(MainActivity.this,RadioButton.getText(),Toast.LENGTH_SHORT).show();
+
+                if(RadioButton.getText().equals("Bagi")){
+                    Result = Double.parseDouble(Input1.getText().toString()) / Double.parseDouble(Input2.getText().toString());
+                    Operand = "+";
+                } else if (RadioButton.getText().equals("Kurang")) {
+                    Result = Double.parseDouble(Input1.getText().toString()) - Double.parseDouble(Input2.getText().toString());
+                    Operand = "-";
+                } else if (RadioButton.getText().equals("Kali")) {
+                    Result = Double.parseDouble(Input1.getText().toString()) * Double.parseDouble(Input2.getText().toString());
+                    Operand = "*";
+                } else {
+                    Result = Double.parseDouble(Input1.getText().toString()) + Double.parseDouble(Input2.getText().toString());
+                    Operand = "/";
+                }
+
+
+                //Log.d(TAG,"IKI DEBUG JAMAN KAWAK");
+                // Create a new user with a first and last name
+                Map<String, Object> hitung = new HashMap<>();
+                hitung.put("Var1", Input1.getText().toString());
+                hitung.put("Var2", Input2.getText().toString());
+                hitung.put("Opr", Operand);
+                hitung.put("Result", Result.toString());
+                // Add a new document with a generated ID
+                db.collection("hitungan")
+                        .add(hitung)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                // Lihat Data (setelah sukses push data)
+                                db.collection("hitungan")
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                                        HasilHitungan.add(document.getData().get("Var1").toString()
+                                                                + document.getData().get("Opr").toString()
+                                                                + document.getData().get("Var2").toString()
+                                                                + "="
+                                                                + document.getData().get("Result").toString());
+                                                    }
+                                                    adapter = new RecyclerviewAdapter(MainActivity.this, HasilHitungan);
+                                                    recyclerView.setAdapter(adapter);
+                                                } else {
+                                                    Log.w(TAG, "Error getting documents.", task.getException());
+                                                }
+                                            }
+                                        });
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document", e);
+                            }
+                        });
+
+            }
+        });
 
     }
 
-    public void hitungPersegi(View v){
-        String n1 = txtn1.getText().toString();
-        double nilai1 = Double.parseDouble(n1);
-        String n2 = txtn1.getText().toString();
-        double nilai2 = Double.parseDouble(n2);
-
-        double keliling = nilai1+nilai2;
-        txthasilkeliling.setText("Keliling persegi pjg = "+keliling);
-
-
-        double luas = nilai1*nilai2;
-        txthasilkeliling.setText("Luas persegi pjg = "+luas);
-
-    }
-
-    public void hitungLingkaran(View v){
-        String n1 = txtn1.getText().toString();
-        double nilai1 = Double.parseDouble(n1);
-        String n2 = txtn1.getText().toString();
-        double nilai2 = Double.parseDouble(n2);
-
-        double keliling = 3.14*(nilai1*2);
-        txthasilkeliling.setText("Keliling lingkaran = "+keliling);
-
-
-        double luas = 3.14*(nilai1*nilai1);
-        txthasilkeliling.setText("Luas lingkaran = "+luas);
-
-    }
-
-    public void hitungSegitiga(View v){
-        String n1 = txtn1.getText().toString();
-        double nilai1 = Double.parseDouble(n1);
-        String n2 = txtn1.getText().toString();
-        double nilai2 = Double.parseDouble(n2);
-
-        double keliling = nilai1+nilai2;
-        txthasilkeliling.setText("Keliling segitiga = "+keliling);
-
-
-        double luas = (nilai1*nilai2)/2;
-        txthasilkeliling.setText("Luas segitiga = "+luas);
+    public void TambahData(View v){
 
     }
 }

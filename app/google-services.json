@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "952748844275",
+    "firebase_url": "https://kalkulatorrizal.firebaseio.com",
+    "project_id": "kalkulatorrizal",
+    "storage_bucket": "kalkulatorrizal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952748844275:android:753903568902c3627e4386",
+        "android_client_info": {
+          "package_name": "com.example.kalkulatorbidang"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "952748844275-h48630frli90he5uc8ojcp8qi4al2l2q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kalkulatorbidang",
+            "certificate_hash": "e52af29f73097cf2df3fb68145a5cefcb03a888d"
+          }
+        },
+        {
+          "client_id": "952748844275-kitas861rpedru2ph67nl4g5tqcm0uug.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFfp0wOqkv8zZAtmcT9DIhKUYyoi7_8dU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "952748844275-kitas861rpedru2ph67nl4g5tqcm0uug.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
